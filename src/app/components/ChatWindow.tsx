@@ -18,6 +18,7 @@ interface SendMessagePayload {
 }
 
 export default function ChatWindow({ socket, user, receiver }: ChatWindowProps) {
+  console.log("ChatWindow props:", user);
   const { messages, loadMore, hasMore } = useMessagesScroll(receiver.id);
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");

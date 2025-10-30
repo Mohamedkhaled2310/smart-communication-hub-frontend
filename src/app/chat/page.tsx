@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
-import api from "../lib/api";
 import { useAuthStore } from "../store/useAuthStore";
 import ChatWindow from "../components/ChatWindow";
 import UserList from "../components/UserList";
@@ -12,8 +11,20 @@ import { User } from "../types/user";
 const socket = io("http://localhost:4000");
 
 export default function ChatPage() {
-  const { user } = useAuthStore()|| {};
+  const { user, isLoading, fetchUser } = useAuthStore();
   const [selectedUser, setSelectedUser] = useState<User>();
+  
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen text-gray-400">Loading...</div>;
+  }
+
+  if (!user) {
+    return <div className="flex items-center justify-center h-screen text-gray-400">Please log in.</div>;
+  }
 
 
   return (

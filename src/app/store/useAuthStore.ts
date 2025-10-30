@@ -1,23 +1,30 @@
+"use client";
 import { create } from "zustand";
-import {User} from "../types/user";
-
+import api from "../lib/api";
+import { User } from "../types/user";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
-  setAuth: (user: User, token: string) => void;
-  logout: () => void;
+  isLoading: boolean;
+  fetchUser: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
-  setAuth: (user, token) => {
-    localStorage.setItem("token", token);
-    set({ user, token });
+  isLoading: true,
+
+  fetchUser: async () => {
+    try {
+      const { data } = await api.get("/auth/me", { withCredentials: true });
+      set({ user: data, isLoading: false });
+    } catch {
+      set({ user: null, isLoading: false });
+    }
   },
-  logout: () => {
-    localStorage.removeItem("token");
-    set({ user: null, token: null });
+
+  logout: async () => {
+    await api.post("/auth/logout", {}, { withCredentials: true });
+    set({ user: null });
   },
 }));
