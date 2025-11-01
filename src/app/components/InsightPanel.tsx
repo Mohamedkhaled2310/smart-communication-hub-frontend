@@ -27,30 +27,46 @@ const fetchInsights = async () => {
   
 
   return (
-    <div className="p-4 h-full overflow-y-auto">
-      <h2 className="text-lg font-semibold mb-2">AI Insights</h2>
+    <div className="h-full overflow-y-auto p-6 bg-linear-to-br from-white via-blue-50 to-blue-100 rounded-2xl shadow-md border border-gray-200">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span className="inline-block w-2 h-5 bg-blue-500 rounded-sm"></span>
+        AI Insights
+      </h2>
+  
       {loading ? (
-        <p className="text-gray-400">Generating insights...</p>
+        <div className="flex items-center justify-center h-40 text-gray-500 animate-pulse">
+          <p>Generating insights...</p>
+        </div>
       ) : insight ? (
-        <div>
-          <p className="font-medium mb-2">Summary:</p>
-          <p className="text-sm text-gray-700 mb-4">{insight.summary}</p>
-          <p className="font-medium">Sentiment:</p>
-          <p
-            className={`text-sm ${
-              insight.sentiment === "positive"
-                ? "text-green-500"
-                : insight.sentiment === "negative"
-                ? "text-red-500"
-                : "text-gray-500"
-            }`}
-          >
-            {insight.sentiment}
-          </p>
+        <div className="space-y-4">
+          {/* Summary Section */}
+          <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-sm">
+            <p className="text-sm font-semibold text-gray-700 mb-1">Summary</p>
+            <p className="text-gray-600 text-sm leading-relaxed">{insight.summary}</p>
+          </div>
+  
+          {/* Sentiment Section */}
+          <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-sm">
+            <p className="text-sm font-semibold text-gray-700 mb-1">Sentiment</p>
+            <p
+              className={`text-base font-medium capitalize ${
+                insight.sentiment === "positive"
+                  ? "text-green-500"
+                  : insight.sentiment === "negative"
+                  ? "text-red-500"
+                  : "text-gray-500"
+              }`}
+            >
+              {insight.sentiment}
+            </p>
+          </div>
         </div>
       ) : (
-        <p className="text-gray-400">No insights yet</p>
+        <div className="flex items-center justify-center h-40 text-gray-400">
+          <p>No insights yet</p>
+        </div>
       )}
     </div>
   );
+  
 }

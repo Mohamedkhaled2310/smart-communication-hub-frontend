@@ -29,7 +29,9 @@ export default function UserList({ selectedUser, onSelect }: UserListProps) {
   }, [hasMore, loadMore]);
 
   return (
-    <div className="overflow-y-auto h-full border-r p-2 bg-white">
+    <div className="overflow-y-auto h-full p-4 bg-white/80 backdrop-blur-xl space-y-2">
+      <h2 className="text-lg font-semibold text-gray-700 mb-3">Chats</h2>
+
       {users.map((user, i) => {
         const isLast = i === users.length - 1;
         return (
@@ -37,19 +39,22 @@ export default function UserList({ selectedUser, onSelect }: UserListProps) {
             key={user.id}
             ref={isLast ? lastUserRef : null}
             onClick={() => onSelect(user)}
-            className={`p-3 border-b cursor-pointer rounded-lg hover:bg-gray-100 ${
-              selectedUser?.id === user.id ? "bg-blue-100 border-blue-400" : ""
+            className={`p-3 cursor-pointer rounded-2xl transition-all shadow-sm ${
+              selectedUser?.id === user.id
+                ? "bg-blue-100 text-blue-700 shadow-md"
+                : "bg-white hover:bg-gray-50 text-gray-800"
             }`}
           >
-            <p className="font-semibold text-gray-800">{user.name}</p>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="font-semibold">{user.name}</p>
+            <p className="text-xs text-gray-500">{user.email}</p>
           </div>
         );
       })}
 
       {isLoading && (
-        <p className="text-center text-gray-500 p-2">Loading...</p>
+        <p className="text-center text-gray-400 text-sm mt-3">Loading...</p>
       )}
     </div>
   );
+  
 }

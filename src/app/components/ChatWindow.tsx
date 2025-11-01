@@ -1,112 +1,166 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { User } from "../types/user";
-import { useMessagesScroll } from "../hooks/useMessagesScroll";
 import { Message } from "../types/message";
+import { useMessagesScroll } from "../hooks/useMessagesScroll";
+import { ArrowLeft } from "lucide-react";
+import MessageInput from "./MessageInput";
 
 interface ChatWindowProps {
   socket: any;
   user: User;
   receiver: User;
+  onBack: () => void;
 }
 
-interface SendMessagePayload {
-  senderId: number;
-  receiverId: number;
-  text: string;
-}
-
-export default function ChatWindow({ socket, user, receiver }: ChatWindowProps) {
-  console.log("ChatWindow props:", user);
+function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
+  console.log("rendering");
   const { messages, loadMore, hasMore } = useMessagesScroll(receiver.id);
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
-  const [text, setText] = useState("");
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [receiverTyping, setReceiverTyping] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<number | null>(null);
+  const textRef = useRef("");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, liveMessages.length]);
 
-  const handleScroll = () => {
-    const el = scrollContainerRef.current;
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
     if (el && el.scrollTop === 0 && hasMore) {
       const oldHeight = el.scrollHeight;
       loadMore();
       setTimeout(() => {
-        const newHeight = el.scrollHeight;
-        el.scrollTop = newHeight - oldHeight;
+        el.scrollTop = el.scrollHeight - oldHeight;
       }, 200);
     }
-  };
+  }, [hasMore, loadMore]);
 
   useEffect(() => {
-    const handleMessage = (message: Message) => {
-      if (
-        (message.senderId === receiver.id && message.receiverId === user.id) ||
-        (message.senderId === user.id && message.receiverId === receiver.id)
-      ) {
-        setLiveMessages((prev) => [...prev, message]);
-      }
+    if (!socket) return;
+
+    const handleMessage = (msg: Message) => {
+      const relevant =
+        (msg.senderId === receiver.id && msg.receiverId === user.id) ||
+        (msg.senderId === user.id && msg.receiverId === receiver.id);
+      if (relevant) setLiveMessages((prev) => [...prev, msg]);
+    };
+
+    const handleTyping = (data: { senderId: number; receiverId: number }) => {
+      if (data.senderId === receiver.id && data.receiverId === user.id)
+        setReceiverTyping(true);
+    };
+
+    const handleStopTyping = (data: { senderId: number; receiverId: number }) => {
+      if (data.senderId === receiver.id && data.receiverId === user.id)
+        setReceiverTyping(false);
     };
 
     socket.on("message", handleMessage);
-    return () => socket.off("message", handleMessage);
-  }, [socket, receiver, user]);
+    socket.on("typing", handleTyping);
+    socket.on("stop_typing", handleStopTyping);
 
-  const sendMessage = () => {
-    if (!text.trim()) return;
+    return () => {
+      socket.off("message", handleMessage);
+      socket.off("typing", handleTyping);
+      socket.off("stop_typing", handleStopTyping);
+    };
+  }, [socket, user.id, receiver.id]);
 
-    const payload: SendMessagePayload = {
+  const handleTextChange = useCallback(
+    (val: string) => {
+      textRef.current = val;
+
+      if (!socket) return;
+      if (!val.trim()) {
+        socket.emit("stop_typing", { senderId: user.id, receiverId: receiver.id });
+        return;
+      }
+
+      socket.emit("typing", { senderId: user.id, receiverId: receiver.id });
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = window.setTimeout(() => {
+        socket.emit("stop_typing", { senderId: user.id, receiverId: receiver.id });
+      }, 1500);
+    },
+    [socket, user.id, receiver.id]
+  );
+
+  const sendMessage = useCallback(() => {
+    const message = textRef.current.trim();
+    if (!message) return;
+
+    socket.emit("send_message", {
       senderId: user.id,
       receiverId: receiver.id,
-      text,
-    };
+      text: message,
+    });
+    socket.emit("stop_typing", { senderId: user.id, receiverId: receiver.id });
+    textRef.current = "";
+  }, [socket, user.id, receiver.id]);
 
-    socket.emit("send_message", payload);
-    setText("");
-  };
-
-  const allMessages = [...messages, ...liveMessages];
+  const allMessages = (() => {
+    const map = new Map<string, Message>();
+    [...messages, ...liveMessages].forEach((m, i) => {
+      const key = (m as any).id ?? `${m.senderId}-${m.receiverId}-${i}`;
+      map.set(key, m);
+    });
+    return Array.from(map.values());
+  })();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-md overflow-hidden">
+      <div className="flex items-center px-4 py-3 border-b bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
+        <button onClick={onBack} className="md:hidden text-gray-500 hover:text-gray-700 transition">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="ml-2">
+          <h2 className="text-lg font-semibold text-gray-800">{receiver.name}</h2>
+          <p className="text-xs text-gray-500">{receiver.email}</p>
+        </div>
+      </div>
+
       <div
-        ref={scrollContainerRef}
+        ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-2"
+        className="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"
       >
-        {allMessages.map((m) => (
-          <div
-            key={m.id}
-            className={`p-2 rounded-lg max-w-xs ${
-              m.senderId === user.id
-                ? "bg-blue-500 text-white ml-auto"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-            {m.text}
+        {allMessages.map((m, i) => {
+          const isMine = m.senderId === user.id;
+          const key = (m as any).id ?? `${m.senderId}-${i}`;
+          return (
+            <div key={key} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`px-4 py-2 rounded-2xl text-sm max-w-[75%] break-words shadow-sm ${
+                  isMine
+                    ? "bg-blue-600 text-white rounded-br-none"
+                    : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                }`}
+              >
+                {m.text}
+              </div>
+            </div>
+          );
+        })}
+
+        {receiverTyping && (
+          <div className="px-3 text-sm text-gray-500 italic animate-pulse">
+            {receiver.name.split(" ")[0]} is typing...
           </div>
-        ))}
+        )}
+
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex p-2 border-t">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          className="flex-1 border rounded-lg p-2"
-          placeholder="Type a message..."
-        />
-        <button
-          onClick={sendMessage}
-          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-lg"
-        >
-          Send
-        </button>
-      </div>
+      <MessageInput text="" setText={handleTextChange} onSend={sendMessage} />
     </div>
   );
 }
+
+export default memo(ChatWindow, (prev, next) =>
+  prev.user.id === next.user.id && prev.receiver.id === next.receiver.id
+);

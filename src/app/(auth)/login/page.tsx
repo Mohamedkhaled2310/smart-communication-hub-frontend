@@ -1,17 +1,18 @@
 "use client";
 
-import {useEffect, useState } from "react";
+import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import api from "../../lib/api";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
+import { AxiosError } from "axios";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { fetchUser ,user,isLoading } = useAuthStore();
+  const { fetchUser} = useAuthStore();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,32 +27,29 @@ export default function LoginPage() {
         { withCredentials: true }
       );
 
-        useEffect(() => {
-          fetchUser();
-        }, [fetchUser]);
-      
-        if (isLoading) {
-          return <div className="flex items-center justify-center h-screen text-gray-400">Loading...</div>;
-        }
+     
+       await fetchUser();
 
-      toast.success(`Welcome back ${user?.name || "User"}!`);
+      toast.success("Successful Login !");
       router.push("/chat");
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message?: string }>;
       toast.error(err.response?.data?.message || "Invalid credentials");
-    } finally {
+    }    
+    finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-blue-50 to-blue-100">
       <Toaster />
       <form
         onSubmit={handleLogin}
         className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-xl w-full max-w-sm border border-blue-100"
       >
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          SmartHub Login
+          Vconnect Login
         </h2>
 
         <div className="space-y-4">
