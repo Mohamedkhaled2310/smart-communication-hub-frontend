@@ -6,6 +6,7 @@ import api from "../../lib/api";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
 import { AxiosError } from "axios";
+import { loginSchema } from "../../../validations/auth.schema";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,12 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) return toast.error("Please fill all fields");
+    const { error } = loginSchema.validate({ email, password }, { abortEarly: false });
+
+    if (error) {
+      error.details.forEach((err) => toast.error(err.message));
+      return;
+    }
 
     try {
       setLoading(true);

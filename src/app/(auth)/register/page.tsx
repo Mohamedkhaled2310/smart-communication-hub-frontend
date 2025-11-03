@@ -5,6 +5,7 @@ import api from "../../lib/api";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { AxiosError } from "axios";
+import { registerSchema } from "../../../validations/auth.schema";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,6 +18,13 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const { error } = registerSchema.validate(form, { abortEarly: false });
+    if (error) {
+      error.details.forEach((err) => toast.error(err.message));
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post("/auth/register", form);
@@ -53,7 +61,7 @@ export default function RegisterPage() {
               value={form.name}
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              required
+              
             />
           </div>
   
@@ -68,7 +76,7 @@ export default function RegisterPage() {
               value={form.email}
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              required
+              
             />
           </div>
   
@@ -83,7 +91,7 @@ export default function RegisterPage() {
               value={form.password}
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              required
+              
             />
           </div>
   
