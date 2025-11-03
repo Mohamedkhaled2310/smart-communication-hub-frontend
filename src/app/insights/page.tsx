@@ -13,7 +13,7 @@ export default function InsightsPage() {
 
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [insight, setInsight] = useState<Insight>(null);
+  const [insight, setInsight] = useState<Insight | null>(null);
 
   useEffect(() => {
     if (!receiverId) return;
