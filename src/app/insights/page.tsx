@@ -1,12 +1,12 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import api from "../lib/api";
 import { Insight } from "../types/insight";
 
-export default function InsightsPage() {
+function InsightsPageInner() {
   const searchParams = useSearchParams();
   const receiverId = searchParams.get("receiverId");
   const name = searchParams.get("name");
@@ -86,5 +86,13 @@ export default function InsightsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function InsightsPage() {
+  return (
+    <Suspense fallback={<div>Loading insights...</div>}>
+      <InsightsPageInner />
+    </Suspense>
   );
 }
