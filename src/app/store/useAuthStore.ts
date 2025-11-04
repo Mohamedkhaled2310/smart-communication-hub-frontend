@@ -16,15 +16,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   fetchUser: async () => {
     try {
-      const { data } = await api.get("/auth/me", { withCredentials: true });
+      const { data } = await api.get("/auth/me");
       set({ user: data, isLoading: false });
-    } catch {
+    } catch { 
       set({ user: null, isLoading: false });
     }
   },
 
   logout: async () => {
-    await api.post("/auth/logout", {}, { withCredentials: true });
+    await api.post("/auth/logout", {});
     set({ user: null });
   },
 }));

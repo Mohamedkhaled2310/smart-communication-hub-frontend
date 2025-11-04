@@ -30,7 +30,6 @@ export default function LoginPage() {
 
       await api.post("/auth/login",
         { email, password },
-        { withCredentials: true }
       );
 
      
