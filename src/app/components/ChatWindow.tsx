@@ -4,6 +4,7 @@ import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { User } from "../types/user";
 import { Message } from "../types/message";
 import { useMessagesScroll } from "../hooks/useMessagesScroll";
+import { formatDate } from "../utils/formatDate"; 
 import { ArrowLeft } from "lucide-react";
 import MessageInput from "./MessageInput";
 
@@ -142,6 +143,9 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
                 }`}
               >
                 {m.text}
+                <p className={`text-[10px] mt-1 ${isMine ? "text-blue-100" : "text-gray-400"}`}>
+                 {formatDate(m.timestamp || new Date())}
+                </p>
               </div>
             </div>
           );

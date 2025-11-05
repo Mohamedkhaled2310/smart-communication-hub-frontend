@@ -8,6 +8,7 @@ import UserList from "../components/UserList";
 import { User } from "../types/user";
 import { MessageSquareIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 
 export default function ChatPage() {
@@ -41,10 +42,14 @@ export default function ChatPage() {
     );
   }
 
+
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-400">
-        Please log in.
+      <div className="flex items-center justify-center h-screen text-gray-400 flex-col gap-4">
+        <p>Please log in.</p>
+        <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Go To Login
+        </Link>
       </div>
     );
   }

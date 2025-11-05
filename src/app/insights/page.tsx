@@ -5,8 +5,11 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import api from "../lib/api";
 import { Insight } from "../types/insight";
+import { useAuthStore } from "../store/useAuthStore";
+import Link from "next/link";
 
 function InsightsPageInner() {
+  const { user, isLoading, fetchUser } = useAuthStore();
   const searchParams = useSearchParams();
   const receiverId = searchParams.get("receiverId");
   const name = searchParams.get("name");
@@ -14,6 +17,10 @@ function InsightsPageInner() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [insight, setInsight] = useState<Insight | null>(null);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   useEffect(() => {
     if (!receiverId) return;
@@ -34,6 +41,26 @@ function InsightsPageInner() {
     fetchInsights();
   }, [receiverId]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-400">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-400 flex-col gap-4">
+        <p>Please log in.</p>
+        <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Go To Login
+        </Link>
+      </div>
+    );
+  }
+
+  // --- Main page ---
   return (
     <div className="flex flex-col h-screen bg-linear-to-br from-white to-blue-50 p-6 relative">
       {/* --- Header --- */}
