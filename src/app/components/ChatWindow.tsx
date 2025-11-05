@@ -4,10 +4,9 @@ import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { User } from "../types/user";
 import { Message } from "../types/message";
 import { useMessagesScroll } from "../hooks/useMessagesScroll";
-import { formatDate } from "../utils/formatDate";
 import { ArrowLeft } from "lucide-react";
 import MessageInput from "./MessageInput";
-
+import MessageItem from "../components/MessageItem";
 interface ChatWindowProps {
   socket: any;
   user: User;
@@ -133,26 +132,13 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"
       >
-        {allMessages.map((m, i) => {
-          const isMine = m.senderId === user.id;
-          const key = (m as any).id ?? `${m.senderId}-${i}`;
-          return (
-            <div key={key} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`px-4 py-2 rounded-2xl text-sm max-w-[75%] break-words shadow-sm ${
-                  isMine
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
-                }`}
-              >
-                {m.text}
-                <p className={`text-[10px] mt-1 ${isMine ? "text-blue-100" : "text-gray-400"}`}>
-                  {formatDate(m.timestamp || new Date())}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+      {allMessages.map((m, i) => (
+        <MessageItem
+          key={(m as any).id ?? `${m.senderId}-${i}`}
+          message={m}
+          isMine={m.senderId === user.id}
+        />
+      ))}
 
         {receiverTyping && (
           <div className="px-3 text-sm text-gray-500 italic animate-pulse">
