@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { User } from "../types/user";
 import { Message } from "../types/message";
 import { useMessagesScroll } from "../hooks/useMessagesScroll";
-import { formatDate } from "../utils/formatDate"; 
+import { formatDate } from "../utils/formatDate";
 import { ArrowLeft } from "lucide-react";
 import MessageInput from "./MessageInput";
 
@@ -16,7 +16,6 @@ interface ChatWindowProps {
 }
 
 function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
-  console.log("rendering");
   const { messages, loadMore, hasMore } = useMessagesScroll(receiver.id);
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
   const [receiverTyping, setReceiverTyping] = useState(false);
@@ -25,10 +24,6 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const textRef = useRef("");
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, liveMessages.length]);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -42,7 +37,9 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
   }, [hasMore, loadMore]);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !user?.id) return;
+
+    socket.emit("register", user.id);
 
     const handleMessage = (msg: Message) => {
       const relevant =
@@ -70,7 +67,12 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
       socket.off("typing", handleTyping);
       socket.off("stop_typing", handleStopTyping);
     };
-  }, [socket, user.id, receiver.id]);
+  }, [socket, user?.id, receiver.id]);
+
+  // --- scroll to bottom on new messages ---
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length, liveMessages.length]);
 
   const handleTextChange = useCallback(
     (val: string) => {
@@ -104,6 +106,7 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
     textRef.current = "";
   }, [socket, user.id, receiver.id]);
 
+  // merge messages
   const allMessages = (() => {
     const map = new Map<string, Message>();
     [...messages, ...liveMessages].forEach((m, i) => {
@@ -144,7 +147,7 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
               >
                 {m.text}
                 <p className={`text-[10px] mt-1 ${isMine ? "text-blue-100" : "text-gray-400"}`}>
-                 {formatDate(m.timestamp || new Date())}
+                  {formatDate(m.timestamp || new Date())}
                 </p>
               </div>
             </div>
