@@ -70,7 +70,7 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
 
   // --- scroll to bottom on new messages ---
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: messages.length > 20 ? "auto" : "smooth" });
   }, [messages.length, liveMessages.length]);
 
   const handleTextChange = useCallback(
