@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import api from "../../lib/api";
 import { useRouter } from "next/navigation";
@@ -13,12 +13,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { fetchUser} = useAuthStore();
-
+  const {user, fetchUser} = useAuthStore();
+  useEffect(() => {
+    if (user) {
+      router.push("/chat");
+    }
+  }, [user, router]);
+  
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const { error } = loginSchema.validate({ email, password }, { abortEarly: false });
+
 
     if (error) {
       error.details.forEach((err) => toast.error(err.message));

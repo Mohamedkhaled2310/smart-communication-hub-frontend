@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../lib/api";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { AxiosError } from "axios";
 import { registerSchema } from "../../../validations/auth.schema";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const {user} = useAuthStore();
 
+  useEffect(() => {
+    if (user) {
+      router.push("/chat");
+    }
+  }, [user, router]);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
