@@ -3,14 +3,17 @@ import { Changa } from "next/font/google";
 import "./globals.css";
 
 const changa = Changa({
-  subsets: ["latin", "arabic"], // include arabic for proper Arabic rendering
+  subsets: ["latin", "arabic"],
   variable: "--font-changa",
-  weight: ["400", "500", "600", "700"], // adjust weights as needed
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Twasol",
+  title: "Tawassul",
   description: "A smart communication hub for seamless connectivity.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

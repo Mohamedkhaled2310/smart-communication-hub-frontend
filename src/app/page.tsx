@@ -11,7 +11,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight text-gray-900">
-              Vconnect — Real-time Chat with AI
+              Tawassul — Real-time Chat with AI
             </h1>
             <p className="mt-4 text-lg text-gray-600 max-w-xl">
               دردش مع أصدقائك أو زملائك فورياً، واستخدم مساعد الذكاء الاصطناعي
@@ -71,7 +71,7 @@ export default function HomePage() {
                       <MessageSquare className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="text-xs text-gray-500">vconnect demo</div>
+                  <div className="text-xs text-gray-500">Tawassul demo</div>
                 </div>
               </div>
 

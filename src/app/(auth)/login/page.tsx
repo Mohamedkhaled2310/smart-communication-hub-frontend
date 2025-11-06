@@ -54,7 +54,7 @@ export default function LoginPage() {
         className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-xl w-full max-w-sm border border-blue-100"
       >
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Vconnect Login
+          Tawassul Login
         </h2>
 
         <div className="space-y-4">

@@ -1,18 +1,25 @@
-import { LogIn, MessageSquare, UserPlus } from "lucide-react";
+import { LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
-
+import Image from "next/image";
 export default function NavBar() {
 return (
 <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-gray-100">
 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
   <div className="flex items-center justify-between h-16">
     <div className="flex items-center space-x-3">
-      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow">
-        <MessageSquare className="w-5 h-5" />
-      </div>
+      <Link href="/" className="flex items-center space-x-2">
+          <Image
+            src="/twassul-logo.png"
+            alt="Tawassul Logo"
+            width={95}
+            height={95}
+            className="rounded-md"
+            priority
+          />
+        </Link>
       <div>
         <Link href="/" className="text-lg font-bold">
-          Vconnect
+          Tawassul
         </Link>
         <p className="text-xs text-gray-500 -mt-0.5">Real-time chat + AI</p>
       </div>
