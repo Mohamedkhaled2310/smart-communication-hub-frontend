@@ -60,7 +60,7 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
     socket.on("message", handleMessage);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
-
+    
     return () => {
       socket.off("message", handleMessage);
       socket.off("typing", handleTyping);

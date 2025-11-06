@@ -15,7 +15,6 @@ export default function ChatPage() {
   const { user, isLoading, fetchUser } = useAuthStore();
   const [selectedUser, setSelectedUser] = useState<User>();
   const router = useRouter();
-    console.log("selectedUser  : ",selectedUser )
   const handleBack = useCallback(() => {
     setSelectedUser(undefined);
   }, []);
