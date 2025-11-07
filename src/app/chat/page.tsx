@@ -8,16 +8,29 @@ import UserList from "../components/UserList";
 import { User } from "../types/user";
 import { MessageSquareIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 
 export default function ChatPage() {
-  const { user, isLoading, fetchUser } = useAuthStore();
+  const { user, fetchUser,logout } = useAuthStore();
   const [selectedUser, setSelectedUser] = useState<User>();
   const router = useRouter();
+  const session = localStorage.getItem("session");
+  useEffect(() => {
+    if (!session) {
+      router.push("/login");
+    }
+  }, [session, router]);
+
   const handleBack = useCallback(() => {
     setSelectedUser(undefined);
   }, []);
+
+  const handleLogout = useCallback(() => {
+    socket.disconnect();
+    logout();
+    localStorage.removeItem("session");
+    router.push("/login");  
+  }, [logout, router]);
 
   const memoizedReceiver = useMemo(() => selectedUser, [selectedUser]);
   const handleOpenInsights = useCallback(() => {
@@ -30,30 +43,8 @@ export default function ChatPage() {
   }, [router, selectedUser]);
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-400">
-        Loading...
-      </div>
-    );
-  }
-
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-400 flex-col gap-4">
-        <p>Please log in.</p>
-        <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-          Go To Login
-        </Link>
-      </div>
-    );
-  }
-
-
+    if(session) fetchUser();
+  }, []);
 
 
   return (
@@ -70,7 +61,7 @@ export default function ChatPage() {
           ${selectedUser ? "-translate-x-full md:translate-x-0" : "translate-x-0"}
         `}
       >
-        <UserList onSelect={setSelectedUser} selectedUser={selectedUser} />
+        <UserList onSelect={setSelectedUser} selectedUser={selectedUser} onLogout={handleLogout} />
       </div>
   
       <div

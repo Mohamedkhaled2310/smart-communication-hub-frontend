@@ -26,12 +26,12 @@ const MessageInput = ({ setText, onSend }: MessageInputProps) => {
   };
 
   return (
-    <div className="flex p-2 border-t bg-white sticky bottom-0">
+    <div className="flex p-2 border-t border-blue-400 bg-white sticky bottom-0">
       <input
         ref={inputRef}
         onInput={handleChange}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        className="flex-1 border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+        className="flex-1 border border-blue-400 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-sm"
         placeholder="Type a message..."
       />
       <button

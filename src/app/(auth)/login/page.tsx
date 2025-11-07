@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import api from "../../lib/api";
 import { useRouter } from "next/navigation";
@@ -11,14 +12,17 @@ import { loginSchema } from "../../../validations/auth.schema";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const {user, fetchUser} = useAuthStore();
+  const { fetchUser} = useAuthStore();
+  const session = localStorage.getItem("session");
+  
   useEffect(() => {
-    if (user) {
+    if (session) {
       router.push("/chat");
     }
-  }, [user, router]);
+  }, [session, router]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,18 +81,26 @@ export default function LoginPage() {
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label className="text-sm font-medium text-gray-600 block mb-1">
               Password
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition pr-10"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
+
 
           <button
             type="submit"

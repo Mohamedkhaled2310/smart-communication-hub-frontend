@@ -18,6 +18,7 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
   const { messages, loadMore, hasMore } = useMessagesScroll(receiver.id);
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
   const [receiverTyping, setReceiverTyping] = useState(false);
+  const [receiverOnline, setReceiverOnline] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -57,14 +58,27 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
         setReceiverTyping(false);
     };
 
+    const handleOnline = (data: { senderId: number; receiverId: number }) => {
+      if (data.senderId === receiver.id && data.receiverId === user.id)
+        setReceiverOnline(true);
+    };
+    const handleOffline = (data: { senderId: number; receiverId: number }) => {
+      if (data.senderId === receiver.id && data.receiverId === user.id)
+        setReceiverOnline(false);
+    };
+
     socket.on("message", handleMessage);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
-    
+    socket.on("user_online", handleOnline);
+    socket.on("user_offline", handleOffline);    
+
     return () => {
       socket.off("message", handleMessage);
       socket.off("typing", handleTyping);
       socket.off("stop_typing", handleStopTyping);
+      socket.off("user_online", handleOnline);
+      socket.off("user_offline", handleOffline);
     };
   }, [socket, user?.id, receiver.id]);
 
@@ -117,13 +131,16 @@ function ChatWindow({ socket, user, receiver, onBack }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-md overflow-hidden">
-      <div className="flex items-center px-4 py-3 border-b bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
+      <div className="flex items-center px-4 py-3 border-b border-blue-400 bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
         <button onClick={onBack} className="md:hidden text-gray-500 hover:text-gray-700 transition">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="ml-2">
           <h2 className="text-lg font-semibold text-gray-800">{receiver.name}</h2>
           <p className="text-xs text-gray-500">{receiver.email}</p>
+          <p className={`text-xs ${receiverOnline ? 'text-green-500' : 'text-red-500'}`}>
+            {receiverOnline ? "Online" : "Offline"}
+          </p>
         </div>
       </div>
 
